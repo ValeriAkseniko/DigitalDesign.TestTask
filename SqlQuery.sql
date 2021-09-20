@@ -16,7 +16,8 @@ FROM Employee
 WHERE Salary = (SELECT MAX(Salary) FROM Employee)
 
 
---2.Отдел, с самой высокой заработной платой между сотрудниками. 
+--2.Отдел, с самой высокой заработной платой между сотрудниками.
+--Отдел с самой высокой зарплатой у сотрудника
 SELECT TOP(1) 
   Department.Id AS DepartmentId, 
   Department.Name AS DepartmentName,
@@ -24,6 +25,16 @@ SELECT TOP(1)
 FROM Department
 JOIN Employee ON Department.Id = Employee.DepartmentId
 ORDER BY Employee.Salary DESC
+
+--Отдел с самой высокой средней зарплатой у сотрудников
+SELECT TOP(1) 
+   AVG(Salary) AS SumSalary,
+   Department.Id AS DepartmentId, 
+   Department.Name AS DepartmentName
+FROM Employee
+JOIN Department ON Employee.DepartmentId = Department.Id
+GROUP BY Department.Id , Department.Name
+ORDER BY SumSalary DESC
 
 
 --3.Отдел, с максимальной суммарной зарплатой сотрудников. 
