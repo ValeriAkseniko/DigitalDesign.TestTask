@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace DigitalDesign.TestTask
 {
@@ -6,7 +9,8 @@ namespace DigitalDesign.TestTask
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Task2CountWords.GetStatisticWords();
+            Console.ReadKey();
         }
     }
 }
