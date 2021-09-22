@@ -8,6 +8,20 @@ namespace DigitalDesign.TestTask
 {
     static class Task2CountWords
     {
+        const string symbols = "-`";
+
+        private static bool IsSymbols (char symbol)
+        {
+            if (!symbols.Contains(symbol))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         private static string GetFilePath()
         {
             bool isCorrectPath = false;
@@ -53,7 +67,7 @@ namespace DigitalDesign.TestTask
             line = line.Trim();
             char[] chars = line.ToCharArray();
             chars = Array.FindAll<char>(chars, (c => char.IsLetter(c)
-                                              || char.IsWhiteSpace(c)));
+                                              || char.IsWhiteSpace(c) || IsSymbols(c)));
             line = new string(chars);
             while (line.Contains("  "))
             {
