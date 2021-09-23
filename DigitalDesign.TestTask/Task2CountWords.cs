@@ -25,13 +25,13 @@ namespace DigitalDesign.TestTask
         private static string GetFilePath()
         {
             bool isCorrectPath = false;
-            Console.WriteLine("Введите путь для чтения");
+            Console.WriteLine(Messeges.InputPath);
             string path = Console.ReadLine();
             isCorrectPath = File.Exists(path);
             while (!isCorrectPath)
             {
-                Console.WriteLine("Не корректный путь для чтения");
-                Console.WriteLine("Введите путь");
+                Console.WriteLine(Messeges.InvalidPath);
+                Console.WriteLine(Messeges.InputPath);
                 path = Console.ReadLine();
                 isCorrectPath = File.Exists(path);
             }
@@ -56,7 +56,7 @@ namespace DigitalDesign.TestTask
             }
             catch (Exception ex)
             {
-                throw;
+                Console.WriteLine(ex.Message);
             }
             RecordTxtFile(wordsCount);
         }
@@ -95,7 +95,7 @@ namespace DigitalDesign.TestTask
         private static void RecordTxtFile(Dictionary<string,int> wordsCount)
         {
             List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
-            Console.WriteLine("Введите путь для записи");
+            Console.WriteLine(Messeges.OutputPath);
             string path = Console.ReadLine();
             try
             {
@@ -106,11 +106,11 @@ namespace DigitalDesign.TestTask
                         sw.WriteLine($"{valuePair.Key} - {valuePair.Value}");
                     }
                 }
-                Console.WriteLine("Запись выполнена");
+                Console.WriteLine(Messeges.RecordingCompleted);
             }
             catch (Exception ex)
             {
-                throw;
+                Console.WriteLine(ex.Message);
             }
         }
     }
