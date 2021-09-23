@@ -6,13 +6,13 @@ using System.Text;
 
 namespace DigitalDesign.TestTask
 {
-    static class Task2CountWords
+    class Task2CountWords
     {
-        const string symbols = "-`";
+        const string validWordSymbols = "-`";
 
-        private static bool IsSymbols (char symbol)
+        private bool IsValidWordSymbols(char symbol)
         {
-            if (!symbols.Contains(symbol))
+            if (!validWordSymbols.Contains(symbol))
             {
                 return false;
             }
@@ -22,7 +22,7 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private static string GetFilePath()
+        private string GetFilePath()
         {
             bool isCorrectPath = false;
             Console.WriteLine(Messeges.InputPath);
@@ -38,9 +38,8 @@ namespace DigitalDesign.TestTask
             return path;
         }
 
-        public static void GetStatisticWords()
+        private Dictionary<string, int> GetStatisticWords(string path)
         {
-            string path = GetFilePath();
             Dictionary<string, int> wordsCount = new Dictionary<string, int>();
             try
             {
@@ -49,26 +48,26 @@ namespace DigitalDesign.TestTask
                     string line;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        List<string> words = ListWords(line);
-                        GetDictionary(words, wordsCount);
+                        List<string> words = GetListWords(line);
+                        AddToCountWords(words, wordsCount);
                     }
+                    return wordsCount;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return;
+                throw;
             }
-            RecordTxtFile(wordsCount);
         }
 
-        private static List<string> ListWords(string line)
+        private List<string> GetListWords(string line)
         {
             line = line.ToLower();
             line = line.Trim();
             char[] chars = line.ToCharArray();
             chars = Array.FindAll<char>(chars, (c => char.IsLetter(c)
-                                              || char.IsWhiteSpace(c) || IsSymbols(c)));
+                                              || char.IsWhiteSpace(c) || IsValidWordSymbols(c)));
             line = new string(chars);
             while (line.Contains("  "))
             {
@@ -78,7 +77,7 @@ namespace DigitalDesign.TestTask
             return words;
         }
 
-        private static void GetDictionary(List<string> words, Dictionary<string, int> wordsCount)
+        private void AddToCountWords(List<string> words, Dictionary<string, int> wordsCount)
         {
             for (int i = 0; i < words.Count; i++)
             {
@@ -93,9 +92,8 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private static void RecordTxtFile(Dictionary<string,int> wordsCount)
-        {
-            List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
+        private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList)
+        {            
             Console.WriteLine(Messeges.OutputPath);
             string path = Console.ReadLine();
             try
@@ -113,6 +111,14 @@ namespace DigitalDesign.TestTask
             {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        public void Execute()
+        {
+            string path = GetFilePath();
+            Dictionary<string, int> wordsCount = GetStatisticWords(path);
+            List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
+            RecordTxtFile(wordsCountList);
         }
     }
 }
