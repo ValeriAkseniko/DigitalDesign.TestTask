@@ -57,6 +57,7 @@ namespace DigitalDesign.TestTask
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return;
             }
             RecordTxtFile(wordsCount);
         }
