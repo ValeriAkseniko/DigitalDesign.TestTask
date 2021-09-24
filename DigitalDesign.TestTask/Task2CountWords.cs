@@ -6,13 +6,13 @@ using System.Text;
 
 namespace DigitalDesign.TestTask
 {
-    static class Task2CountWords
+    class Task2CountWords
     {
-        const string symbols = "-`";
+        const string validWordSymbols = "-`";
 
-        private static bool IsSymbols (char symbol)
+        private bool IsValidWordSymbols(char symbol)
         {
-            if (!symbols.Contains(symbol))
+            if (!validWordSymbols.Contains(symbol))
             {
                 return false;
             }
@@ -22,62 +22,80 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private static string GetFilePath()
+        private string GetFilePath()
         {
             bool isCorrectPath = false;
-            Console.WriteLine("Введите путь для чтения");
+            Console.WriteLine(Messeges.InputPath);
             string path = Console.ReadLine();
             isCorrectPath = File.Exists(path);
             while (!isCorrectPath)
             {
-                Console.WriteLine("Не корректный путь для чтения");
-                Console.WriteLine("Введите путь");
+                Console.WriteLine(Messeges.InvalidPath);
+                Console.WriteLine(Messeges.InputPath);
                 path = Console.ReadLine();
                 isCorrectPath = File.Exists(path);
             }
             return path;
         }
 
-        public static void GetStatisticWords()
+        private Dictionary<string, int> GetStatisticWords(string path)
         {
-            string path = GetFilePath();
             Dictionary<string, int> wordsCount = new Dictionary<string, int>();
             try
             {
                 using (StreamReader sr = new StreamReader(path))
                 {
                     string line;
+                    string wordOnTwoLines = null;
                     while ((line = sr.ReadLine()) != null)
                     {
-                        List<string> words = ListWords(line);
-                        GetDictionary(words, wordsCount);
+                        List<string> words = GetListWords(line);
+                        if (wordOnTwoLines != null)
+                        {
+                            wordOnTwoLines = wordOnTwoLines.Trim('-');
+                            words[0] = wordOnTwoLines + words[0];
+                            wordOnTwoLines = null;
+                        }
+                        string lastWord = words.Last();
+                        if (lastWord != null)
+                        {
+                            char lastSymbol = lastWord.Last();
+                            if (IsValidWordSymbols(lastSymbol))
+                            {
+                                wordOnTwoLines = words.Last();
+                                words.Remove(words.Last());
+                            }
+                        }
+                        AddToCountWords(words, wordsCount);
                     }
+                    return wordsCount;
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 throw;
             }
-            RecordTxtFile(wordsCount);
         }
 
-        private static List<string> ListWords(string line)
+        private List<string> GetListWords(string line)
         {
             line = line.ToLower();
             line = line.Trim();
             char[] chars = line.ToCharArray();
             chars = Array.FindAll<char>(chars, (c => char.IsLetter(c)
-                                              || char.IsWhiteSpace(c) || IsSymbols(c)));
+                                              || char.IsWhiteSpace(c) || IsValidWordSymbols(c)));
             line = new string(chars);
             while (line.Contains("  "))
             {
                 line = line.Replace("  ", " ");
             }
             List<string> words = line.Split(' ').ToList();
+            words = words.Where(x => !(x.Length == 1 && IsValidWordSymbols(x.First()))).ToList();
             return words;
         }
 
-        private static void GetDictionary(List<string> words, Dictionary<string, int> wordsCount)
+        private void AddToCountWords(List<string> words, Dictionary<string, int> wordsCount)
         {
             for (int i = 0; i < words.Count; i++)
             {
@@ -92,10 +110,9 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private static void RecordTxtFile(Dictionary<string,int> wordsCount)
-        {
-            List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
-            Console.WriteLine("Введите путь для записи");
+        private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList)
+        {            
+            Console.WriteLine(Messeges.OutputPath);
             string path = Console.ReadLine();
             try
             {
@@ -106,12 +123,20 @@ namespace DigitalDesign.TestTask
                         sw.WriteLine($"{valuePair.Key} - {valuePair.Value}");
                     }
                 }
-                Console.WriteLine("Запись выполнена");
+                Console.WriteLine(Messeges.RecordingCompleted);
             }
             catch (Exception ex)
             {
-                throw;
+                Console.WriteLine(ex.Message);
             }
+        }
+
+        public void Execute()
+        {
+            string path = GetFilePath();
+            Dictionary<string, int> wordsCount = GetStatisticWords(path);
+            List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
+            RecordTxtFile(wordsCountList);
         }
     }
 }

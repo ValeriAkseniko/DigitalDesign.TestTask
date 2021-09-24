@@ -9,7 +9,8 @@ namespace DigitalDesign.TestTask
     {
         static void Main(string[] args)
         {
-            Task2CountWords.GetStatisticWords();
+            Task2CountWords task2CountWords = new Task2CountWords();
+            task2CountWords.Execute();
             Console.ReadKey();
         }
     }
