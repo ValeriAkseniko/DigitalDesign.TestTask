@@ -46,9 +46,26 @@ namespace DigitalDesign.TestTask
                 using (StreamReader sr = new StreamReader(path))
                 {
                     string line;
+                    string wordOnTwoLines = null;
                     while ((line = sr.ReadLine()) != null)
                     {
                         List<string> words = GetListWords(line);
+                        if (wordOnTwoLines != null)
+                        {
+                            wordOnTwoLines = wordOnTwoLines.Trim('-');
+                            words[0] = wordOnTwoLines + words[0];
+                            wordOnTwoLines = null;
+                        }
+                        string lastWord = words.Last();
+                        if (lastWord != null)
+                        {
+                            char lastSymbol = lastWord.Last();
+                            if (IsValidWordSymbols(lastSymbol))
+                            {
+                                wordOnTwoLines = words.Last();
+                                words.Remove(words.Last());
+                            }
+                        }
                         AddToCountWords(words, wordsCount);
                     }
                     return wordsCount;
@@ -74,6 +91,7 @@ namespace DigitalDesign.TestTask
                 line = line.Replace("  ", " ");
             }
             List<string> words = line.Split(' ').ToList();
+            words = words.Where(x => !(x.Length == 1 && IsValidWordSymbols(x.First()))).ToList();
             return words;
         }
 
