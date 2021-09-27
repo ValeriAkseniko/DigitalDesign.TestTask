@@ -12,26 +12,19 @@ namespace DigitalDesign.TestTask
 
         private bool IsValidWordSymbols(char symbol)
         {
-            if (!validWordSymbols.Contains(symbol))
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return validWordSymbols.Contains(symbol);
         }
 
         private string GetFilePath()
         {
             bool isCorrectPath = false;
-            Console.WriteLine(Messeges.InputPath);
+            Console.WriteLine(Messages.InputPath);
             string path = Console.ReadLine();
             isCorrectPath = File.Exists(path);
             while (!isCorrectPath)
             {
-                Console.WriteLine(Messeges.InvalidPath);
-                Console.WriteLine(Messeges.InputPath);
+                Console.WriteLine(Messages.InvalidPath);
+                Console.WriteLine(Messages.InputPath);
                 path = Console.ReadLine();
                 isCorrectPath = File.Exists(path);
             }
@@ -53,7 +46,10 @@ namespace DigitalDesign.TestTask
                         if (wordOnTwoLines != null)
                         {
                             wordOnTwoLines = wordOnTwoLines.Trim('-');
-                            words[0] = wordOnTwoLines + words[0];
+                            if (words.Count > 0)
+                            {
+                                words[0] = wordOnTwoLines + words[0];
+                            }                            
                             wordOnTwoLines = null;
                         }
                         string lastWord = words.Last();
@@ -97,7 +93,7 @@ namespace DigitalDesign.TestTask
 
         private void AddToCountWords(List<string> words, Dictionary<string, int> wordsCount)
         {
-            for (int i = 0; i < words.Count; i++)
+            foreach (var word in words)
             {
                 if (!wordsCount.ContainsKey(words[i]))
                 {
@@ -110,10 +106,8 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList)
-        {            
-            Console.WriteLine(Messeges.OutputPath);
-            string path = Console.ReadLine();
+        private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList,string path)
+        {
             try
             {
                 using (StreamWriter sw = new StreamWriter(path, false, System.Text.Encoding.Default))
@@ -123,7 +117,7 @@ namespace DigitalDesign.TestTask
                         sw.WriteLine($"{valuePair.Key} - {valuePair.Value}");
                     }
                 }
-                Console.WriteLine(Messeges.RecordingCompleted);
+                Console.WriteLine(Messages.RecordingCompleted);
             }
             catch (Exception ex)
             {
@@ -131,12 +125,28 @@ namespace DigitalDesign.TestTask
             }
         }
 
+        private string GetDirectoryPath()
+        {
+            Console.WriteLine(Messages.OutputDirectoryPath);
+            string path = Console.ReadLine();
+            bool isCorrecPath = Directory.Exists(path);
+            while (!isCorrecPath)
+            {
+                Console.WriteLine(Messages.InvalidPath);
+                Console.WriteLine(Messages.InputPath);
+                path = Console.ReadLine();
+                isCorrecPath = Directory.Exists(path);
+            }
+            return path;
+        }
+
         public void Execute()
         {
             string path = GetFilePath();
             Dictionary<string, int> wordsCount = GetStatisticWords(path);
             List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
-            RecordTxtFile(wordsCountList);
+            path = GetDirectoryPath();
+            RecordTxtFile(wordsCountList,$@"{path}\result.txt");
         }
     }
 }
