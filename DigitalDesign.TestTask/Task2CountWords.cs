@@ -23,7 +23,7 @@ namespace DigitalDesign.TestTask
             isCorrectPath = File.Exists(path);
             while (!isCorrectPath)
             {
-                Console.WriteLine(Messages.InvalidPath);
+                Console.WriteLine(Messages.InvalidInputPath);
                 Console.WriteLine(Messages.InputPath);
                 path = Console.ReadLine();
                 isCorrectPath = File.Exists(path);
@@ -87,6 +87,13 @@ namespace DigitalDesign.TestTask
                 line = line.Replace("  ", " ");
             }
             List<string> words = line.Split(' ').ToList();
+            words = RemoveWordsConsistingOnlyOfValidSymbol(words);
+            return words;
+
+        }
+
+        private List<string> RemoveWordsConsistingOnlyOfValidSymbol(List<string> words)
+        {
             words = words.Where(x => !(x.Length == 1 && IsValidWordSymbols(x.First()))).ToList();
             return words;
         }
@@ -95,13 +102,13 @@ namespace DigitalDesign.TestTask
         {
             foreach (var word in words)
             {
-                if (!wordsCount.ContainsKey(words[i]))
+                if (!wordsCount.ContainsKey(word))
                 {
-                    wordsCount.Add(words[i], 1);
+                    wordsCount.Add(word, 1);
                 }
                 else
                 {
-                    wordsCount[words[i]]++;
+                    wordsCount[word]++;
                 }
             }
         }
@@ -132,8 +139,8 @@ namespace DigitalDesign.TestTask
             bool isCorrecPath = Directory.Exists(path);
             while (!isCorrecPath)
             {
-                Console.WriteLine(Messages.InvalidPath);
-                Console.WriteLine(Messages.InputPath);
+                Console.WriteLine(Messages.InvalidOutputPath);
+                Console.WriteLine(Messages.OutputDirectoryPath);
                 path = Console.ReadLine();
                 isCorrecPath = Directory.Exists(path);
             }
