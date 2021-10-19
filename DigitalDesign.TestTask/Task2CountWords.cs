@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace DigitalDesign.TestTask
 {
-    class Task2CountWords
+     class Task2CountWords
     {
-        private string GetFilePath()
+        private static string GetFilePath()
         {
             bool isCorrectPath = false;
             Console.WriteLine(Messages.InputPath);
@@ -25,7 +26,7 @@ namespace DigitalDesign.TestTask
             return path;
         }
 
-        private string TxtFile(string path)
+        private static string TxtFile(string path)
         {
             string result;
             try
@@ -43,7 +44,7 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList,string path)
+        private static void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList,string path)
         {
             try
             {
@@ -62,7 +63,7 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private string GetDirectoryPath()
+        private static string GetDirectoryPath()
         {
             Console.WriteLine(Messages.OutputDirectoryPath);
             string path = Console.ReadLine();
@@ -77,15 +78,16 @@ namespace DigitalDesign.TestTask
             return path;
         }
 
-        public void Execute()
+        public static void Execute()
         {
-            TextToDictionary textToDictionary = new TextToDictionary();
             string path = GetFilePath();
             string txt = TxtFile(path);
-            Dictionary<string, int> wordsCount = textToDictionary.ToDictionary(txt);
+            Type type = typeof(TextToDictionary);
+            MethodInfo methodInfos = type.GetMethod("ToDictionary", BindingFlags.NonPublic);
+            Dictionary<string, int> wordsCount = methodInfos.Invoke(type , txt);
             List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
             path = GetDirectoryPath();
-            RecordTxtFile(wordsCountList,$@"{path}\result.txt");
+            RecordTxtFile(wordsCountList, $@"{path}\result.txt");
         }
     }
 }

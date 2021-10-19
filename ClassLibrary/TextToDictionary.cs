@@ -39,7 +39,7 @@ namespace ClassLibrary
 
         }
 
-        public Dictionary<string, int> ToDictionary(string text)
+        private Dictionary<string, int> ToDictionary(string text)
         {
             List<string> words = GetListWords(text);
             Dictionary<string, int> result = new Dictionary<string, int>();
