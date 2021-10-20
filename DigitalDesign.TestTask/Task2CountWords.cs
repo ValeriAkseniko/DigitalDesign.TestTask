@@ -10,7 +10,7 @@ namespace DigitalDesign.TestTask
 {
      class Task2CountWords
     {
-        private static string GetFilePath()
+        private string GetFilePath()
         {
             bool isCorrectPath = false;
             Console.WriteLine(Messages.InputPath);
@@ -26,7 +26,7 @@ namespace DigitalDesign.TestTask
             return path;
         }
 
-        private static string TxtFile(string path)
+        private string TxtFile(string path)
         {
             string result;
             try
@@ -44,7 +44,7 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private static void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList,string path)
+        private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList,string path)
         {
             try
             {
@@ -63,7 +63,7 @@ namespace DigitalDesign.TestTask
             }
         }
 
-        private static string GetDirectoryPath()
+        private string GetDirectoryPath()
         {
             Console.WriteLine(Messages.OutputDirectoryPath);
             string path = Console.ReadLine();
@@ -78,13 +78,15 @@ namespace DigitalDesign.TestTask
             return path;
         }
 
-        public static void Execute()
+        public void Execute()
         {
             string path = GetFilePath();
             string txt = TxtFile(path);
             Type type = typeof(TextToDictionary);
-            MethodInfo methodInfos = type.GetMethod("ToDictionary", BindingFlags.NonPublic);
-            Dictionary<string, int> wordsCount = methodInfos.Invoke(type , txt);
+            MethodInfo methodInfos = type.GetMethod("ToDictionary", BindingFlags.NonPublic | BindingFlags.Static);
+            object[] paprametrs = new object[] { txt };
+            object resultInvoke = methodInfos.Invoke(type, paprametrs);
+            Dictionary<string, int> wordsCount = (Dictionary<string, int>)resultInvoke;
             List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
             path = GetDirectoryPath();
             RecordTxtFile(wordsCountList, $@"{path}\result.txt");

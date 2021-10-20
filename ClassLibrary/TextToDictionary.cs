@@ -10,18 +10,18 @@ namespace ClassLibrary
     {
         const string validWordSymbols = "-`";
 
-        private bool IsValidWordSymbols(char symbol)
+        private static bool IsValidWordSymbols(char symbol)
         {
             return validWordSymbols.Contains(symbol);
         }
 
-        private List<string> RemoveWordsConsistingOnlyOfValidSymbol(List<string> words)
+        private static List<string> RemoveWordsConsistingOnlyOfValidSymbol(List<string> words)
         {
             words = words.Where(x => !(x.Length == 1 && IsValidWordSymbols(x.First()))).ToList();
             return words;
         }
 
-        private List<string> GetListWords(string line)
+        private static List<string> GetListWords(string line)
         {
             line = line.ToLower();
             line = line.Trim();
@@ -39,7 +39,7 @@ namespace ClassLibrary
 
         }
 
-        private Dictionary<string, int> ToDictionary(string text)
+        private static Dictionary<string, int> ToDictionary(string text)
         {
             List<string> words = GetListWords(text);
             Dictionary<string, int> result = new Dictionary<string, int>();
