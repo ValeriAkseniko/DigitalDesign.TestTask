@@ -78,16 +78,62 @@ namespace DigitalDesign.TestTask
             return path;
         }
 
-        public void Execute()
+        private Dictionary<string, int> GetWordsCount(string txt)
         {
-            string path = GetFilePath();
-            string txt = TxtFile(path);
             Type type = typeof(TextToDictionary);
             MethodInfo methodInfos = type.GetMethod("ToDictionary", BindingFlags.NonPublic | BindingFlags.Static);
             object[] paprametrs = new object[] { txt };
             object resultInvoke = methodInfos.Invoke(type, paprametrs);
             Dictionary<string, int> wordsCount = (Dictionary<string, int>)resultInvoke;
-            List<KeyValuePair<string, int>> wordsCountList = wordsCount.OrderByDescending(x => x.Value).ToList();
+            return wordsCount;
+        }
+        
+        private Dictionary<string,int> GetUnionDictionary(List<Dictionary<string, int>> listDictionary)
+        {
+            Dictionary<string, int> result = new Dictionary<string, int>();
+            foreach (Dictionary<string, int> dictionaryByLine in listDictionary)
+            {
+                foreach (KeyValuePair<string, int> item in dictionaryByLine)
+                {
+                    if (!result.Keys.Contains(item.Key))
+                    {
+                        result.Add(item.Key,item.Value);
+                    }
+                    else
+                    {
+                        result[item.Key] += item.Value;
+                    }
+                }
+            }
+            return result;
+        }
+
+        public void Execute()
+        {
+            string path = GetFilePath();
+            string txt;
+            List<Dictionary<string, int>> dictionaryByLines = new List<Dictionary<string, int>>();
+            try
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    while ((txt = sr.ReadLine()) != null)
+                    {
+                        var wordsCount = GetWordsCount(txt);
+                        dictionaryByLines.Add(wordsCount);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+
+            List<KeyValuePair<string, int>> wordsCountList = new List<KeyValuePair<string, int>>();
+            var resultWordsCount = GetUnionDictionary(dictionaryByLines);
+            wordsCountList = resultWordsCount.OrderByDescending(x => x.Value).ToList();
             path = GetDirectoryPath();
             RecordTxtFile(wordsCountList, $@"{path}\result.txt");
         }
