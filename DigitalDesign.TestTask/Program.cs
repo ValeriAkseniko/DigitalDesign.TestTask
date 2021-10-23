@@ -1,8 +1,4 @@
-﻿using ClassLibrary;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System;
 
 namespace DigitalDesign.TestTask
 {
@@ -10,9 +6,7 @@ namespace DigitalDesign.TestTask
     {
         static void Main(string[] args)
         {
-            Task2CountWords task2CountWords = new Task2CountWords();
-            task2CountWords.Execute();
-            Console.ReadKey();
+            
         }
     }
 }
