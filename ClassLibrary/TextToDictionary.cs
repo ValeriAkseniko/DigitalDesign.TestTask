@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassLibrary
 {
@@ -40,6 +38,24 @@ namespace ClassLibrary
         }
 
         private static Dictionary<string, int> ToDictionary(string text)
+        {
+            List<string> words = GetListWords(text);
+            Dictionary<string, int> result = new Dictionary<string, int>();
+            for (int i = 0; i < words.Count; i++)
+            {
+                if (!result.ContainsKey(words[i]))
+                {
+                    result.Add(words[i], 1);
+                }
+                else
+                {
+                    result[words[i]]++;
+                }
+            }
+            return result;
+        }
+
+        public static Dictionary<string, int> PublicToDictionary(string text)
         {
             List<string> words = GetListWords(text);
             Dictionary<string, int> result = new Dictionary<string, int>();

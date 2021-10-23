@@ -3,12 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Reflection;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace DigitalDesign.TestTask
 {
-     class Task2CountWords
+    class Task2CountWords
     {
         private string GetFilePath()
         {
@@ -24,27 +25,9 @@ namespace DigitalDesign.TestTask
                 isCorrectPath = File.Exists(path);
             }
             return path;
-        }
+        }        
 
-        private string TxtFile(string path)
-        {
-            string result;
-            try
-            {
-                using (StreamReader sr = new StreamReader(path))
-                {
-                    result = sr.ReadToEnd();
-                    return result;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
-        }
-
-        private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList,string path)
+        private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList, string path)
         {
             try
             {
@@ -87,8 +70,8 @@ namespace DigitalDesign.TestTask
             Dictionary<string, int> wordsCount = (Dictionary<string, int>)resultInvoke;
             return wordsCount;
         }
-        
-        private Dictionary<string,int> GetUnionDictionary(List<Dictionary<string, int>> listDictionary)
+
+        private Dictionary<string, int> GetUnionDictionary(List<Dictionary<string, int>> listDictionary)
         {
             Dictionary<string, int> result = new Dictionary<string, int>();
             foreach (Dictionary<string, int> dictionaryByLine in listDictionary)
@@ -97,7 +80,7 @@ namespace DigitalDesign.TestTask
                 {
                     if (!result.Keys.Contains(item.Key))
                     {
-                        result.Add(item.Key,item.Value);
+                        result.Add(item.Key, item.Value);
                     }
                     else
                     {
@@ -106,22 +89,22 @@ namespace DigitalDesign.TestTask
                 }
             }
             return result;
-        }
+        }        
 
         public void Execute()
         {
+            Stopwatch stopwatch = new Stopwatch();
+
             string path = GetFilePath();
             string txt;
-            List<Dictionary<string, int>> dictionaryByLines = new List<Dictionary<string, int>>();
+            List<string> lines = new List<string>();
             try
             {
                 using (StreamReader sr = new StreamReader(path))
                 {
                     while ((txt = sr.ReadLine()) != null)
                     {
-                        var wordsCount = GetWordsCount(txt);
-                        dictionaryByLines.Add(wordsCount);
-
+                        lines.Add(txt);
                     }
                 }
             }
@@ -131,11 +114,75 @@ namespace DigitalDesign.TestTask
                 throw;
             }
 
-            List<KeyValuePair<string, int>> wordsCountList = new List<KeyValuePair<string, int>>();
-            var resultWordsCount = GetUnionDictionary(dictionaryByLines);
-            wordsCountList = resultWordsCount.OrderByDescending(x => x.Value).ToList();
+            var resultWordsCount = new Dictionary<string, int>();
+            stopwatch.Start();
+            foreach (var line in lines)
+            {
+                var wordsCount = GetWordsCount(line);
+                AddToDictionary(wordsCount, resultWordsCount);
+            }
+            stopwatch.Stop();
+
+            var wordsCountList = resultWordsCount.OrderByDescending(x => x.Value).ToList();
             path = GetDirectoryPath();
             RecordTxtFile(wordsCountList, $@"{path}\result.txt");
+            Console.WriteLine(stopwatch.ElapsedMilliseconds);
+        }
+
+        private static void AddToDictionary(Dictionary<string, int> wordsCount, Dictionary<string, int> resultWordsCount)
+        {
+            foreach (var wordCount in wordsCount)
+            {
+                if (resultWordsCount.Keys.Contains(wordCount.Key))
+                {
+                    resultWordsCount[wordCount.Key] += wordCount.Value;
+                }
+                else
+                {
+                    resultWordsCount.Add(wordCount.Key, wordCount.Value);
+                }
+            }
+        }
+
+        public void ExecuteParallel()
+        {
+            Stopwatch stopwatch = new Stopwatch();
+
+            string path = GetFilePath();
+            List<string> lines = new List<string>();
+            string txt;
+            try
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    while ((txt = sr.ReadLine()) != null)
+                    {
+                        lines.Add(txt);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+            var resultWordsCount = new Dictionary<string, int>();
+            stopwatch.Start();
+            Parallel.ForEach(lines,
+                line =>
+                {
+                    lock (resultWordsCount)
+                    {
+                        var wordsCount = GetWordsCount(line);
+                        AddToDictionary(wordsCount, resultWordsCount);
+                    }
+                });
+            stopwatch.Stop();
+
+            var wordsCountList = resultWordsCount.OrderByDescending(x => x.Value).ToList();
+            path = GetDirectoryPath();
+            RecordTxtFile(wordsCountList, $@"{path}\result.txt");
+            Console.WriteLine(stopwatch.ElapsedMilliseconds);
         }
     }
 }
