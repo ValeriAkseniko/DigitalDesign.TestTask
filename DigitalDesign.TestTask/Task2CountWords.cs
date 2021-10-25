@@ -6,6 +6,8 @@ using System.Linq;
 using System.Reflection;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace DigitalDesign.TestTask
 {
@@ -25,7 +27,7 @@ namespace DigitalDesign.TestTask
                 isCorrectPath = File.Exists(path);
             }
             return path;
-        }        
+        }
 
         private void RecordTxtFile(List<KeyValuePair<string, int>> wordsCountList, string path)
         {
@@ -89,7 +91,7 @@ namespace DigitalDesign.TestTask
                 }
             }
             return result;
-        }        
+        }
 
         public void Execute()
         {
@@ -183,6 +185,64 @@ namespace DigitalDesign.TestTask
             path = GetDirectoryPath();
             RecordTxtFile(wordsCountList, $@"{path}\result.txt");
             Console.WriteLine(stopwatch.ElapsedMilliseconds);
+        }
+
+        public async Task ExecuteWebApiAsync()
+        {            
+            string path = GetFilePath();
+            List<string> lines = new List<string>();
+            string txt;
+            try
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    while ((txt = sr.ReadLine()) != null)
+                    {
+                        lines.Add(txt);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+         
+            var resultWordsCount = new Dictionary<string, int>();
+            Task<Dictionary<string, int>>[] tasks = new Task<Dictionary<string, int>>[lines.Count];
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var wordsCountTask = GetWordsCountFromWebApiAsync(lines[i]);
+                tasks[i] = wordsCountTask;
+            }
+            await Task.WhenAll<Dictionary<string, int>>(tasks);
+            foreach (var task in tasks)
+            {
+                AddToDictionary(task.Result, resultWordsCount);
+            }
+            var wordsCountList = resultWordsCount.OrderByDescending(x => x.Value).ToList();
+            path = GetDirectoryPath();
+            RecordTxtFile(wordsCountList, $@"{path}\result.txt");
+        }
+
+        private async Task<Dictionary<string, int>> GetWordsCountFromWebApiAsync(string text)
+        {
+            using(HttpClient client = new HttpClient())
+            {
+                
+                var responseMessage = await client.GetAsync($@"https://localhost:5001/api/Dictionary/ToDictionary?text={text}");
+                string responseBody = await responseMessage.Content.ReadAsStringAsync();
+                try
+                {
+                    Dictionary<string, int> result = JsonConvert.DeserializeObject<Dictionary<string, int>>(responseBody);
+                    return result;
+                }
+                catch (Exception ex)
+                {
+                    return new Dictionary<string, int>();
+                }
+               
+            }
         }
     }
 }
